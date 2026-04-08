@@ -11,8 +11,10 @@ const server = http.createServer(app);
 
 // Настраиваем Socket.io (наши сверхбыстрые веб-сокеты)
 const io = new Server(server, {
+  pingInterval: 5000,   // 🚀 ИСПРАВЛЕНИЕ: Пингуем каждые 5 секунд (вместо 25)
+  pingTimeout: 5000,    // 🚀 ИСПРАВЛЕНИЕ: Ждем ответа 5 секунд, потом считаем отключенным (вместо 20)
   cors: {
-    origin: "*", // Разрешаем подключаться с любого адреса
+    origin: "*", 
     methods: ["GET", "POST"]
   }
 });
@@ -36,7 +38,7 @@ io.on('connection', (socket) => {
     // Мгновенно кричим создателю, что мы зашли (наш Будильник!)
     socket.to(matchId).emit('wakeUpCreator'); 
 
-    // 🚀 НОВОЕ: Если игрок вернулся, отменяем таймер технического поражения!
+    // Если игрок вернулся, отменяем таймер технического поражения!
     if (disconnectTimeouts[matchId]) {
       clearTimeout(disconnectTimeouts[matchId]);
       delete disconnectTimeouts[matchId];
@@ -50,7 +52,7 @@ io.on('connection', (socket) => {
     socket.to(matchId).emit('gameStateUpdate', state);
   });
 
-  // 🚀 НОВОЕ: Умный слушатель отключения
+  // Умный слушатель отключения
   socket.on('disconnect', () => {
     console.log(`🔴 Игрок отключился: ${socket.id}`);
     
@@ -82,4 +84,3 @@ const PORT = process.env.PORT || 3001;
 server.listen(PORT, () => {
   console.log(`🚀 Игровой сервер успешно запущен на порту ${PORT}`);
 });
-
